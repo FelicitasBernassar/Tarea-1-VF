@@ -1,0 +1,214 @@
+---
+title: "Tarea 1 VERSIÓN FINAL"
+author: "Felicitas Bernassar"
+date: "2/10/2021"
+output: html_document
+---
+
+
+```{r}
+library("tidyverse")
+```
+
+
+Para el ejercicio 1 voy a trabajar con el Dataset “Properati | Propiedades en Venta y Alquiler publicados” (AMBA/oct.-dic. 2020).
+
+```{r}
+properati_2020 <- read.csv ("data/amba_properati_oct_dic_2020.csv")
+```
+
+Ahora, quiero conocer mi Dataset
+
+```{r}
+dim(properati_2020)
+```
+Podemos observar que tenemos 30965 filas/registros y 13 columnas. 
+
+
+Ahora, quiero ver la información de esas 13 columnas:
+
+```{r}
+names(properati_2020)
+```
+Las variables tienen información sobre: 1. Fecha de publicación; 2. Provincia/partido; 3. Ambientes; 4. Superficie total/superficie cubierta; 5. Precio/Moneda; 6. Título; 7. Tipo de propiedad; 8. Tipo de operación; 9. Latitud/longitud.
+
+
+Vamos a filtrar para quedarnos solamente con las propiedades del GBA:
+
+```{r}
+filtro <- filter(properati_2020, provincia=="GBA")
+```
+
+
+```{r}
+head(filtro)
+```
+
+
+¡Logrado!
+
+A continuación filtraremos las propiedades según su precio para quedarnos con propiedades de igual o mayor valor que 50.000
+
+```{r}
+filtro <- filter(filtro, price >= 50000)
+```
+
+
+```{r}
+head(filtro)
+```
+
+¡Logrado!
+
+Filtremos nuevamente, esta vez, por tipo de moneda:
+
+```{r}
+filtro <- filter(filtro, currency=="USD")
+```
+
+
+```{r}
+head(filtro)
+```
+
+Nos quedamos solamente con los valores expresados en USD.
+
+
+Vamos a dar un paso más. Nos quedaremos solo con nuestras columnas de interés: partido, ambientes, tipo de operación, precio y superficie total.
+
+
+```{r}
+seleccion <- select(properati_2020, partido, rooms, operation_type, price, surface_total)
+```
+
+
+```{r}
+names(seleccion)
+```
+
+De este modo, nos quedamos sólo con 5 variables para nuestro análisis.
+
+
+```{r}
+head(seleccion)
+```
+
+
+A continuación, teniendo los datos del precio y la superficie total de las propiedades, vamos a agregar una nueva columna que incluya el valor del m2.
+
+
+```{r}
+modificar <- mutate(properati_2020, precio_m2=price/surface_total)
+```
+
+
+```{r}
+dim(modificar)
+```
+
+Como podemos observar, se agregó una nueva columna, ya que antes eran 13.
+
+
+Ahora quiero ordenar la columna de la fecha de publicación (“created_on”) de las propiedades.
+
+
+```{r}
+ordenar <- arrange(properati_2020, created_on)
+```
+
+
+
+```{r}
+head(ordenar)
+```
+
+
+También voy a renombrar las columnas “partidos”, “price” y “currency” a “jurisdicciones”, “precio” y “moneda” respectivamente.
+
+
+
+```{r}
+renombrar <- rename(properati_2020, jurisdicciones=partido, precio=price, moneda=currency)
+```
+
+
+```{r}
+head(renombrar)
+```
+
+
+Por último, voy a filtrar por tipo de operación-alquiler en moneda pesos.
+
+
+```{r}
+alquiler_pes <- filter(properati_2020, operation_type=="Alquiler" & currency=="ARS")
+```
+
+```{r}
+head(alquiler_pes)
+```
+
+Ya tengo el dataset filtrado por alquileres en pesos. Por último, podría sacar el valor promedio del metro cuadrado total de alquileres en pesos.
+
+
+```{r}
+summarise(alquiler_pes, promedio_alquiler=mean(price/surface_total)) 
+```
+
+
+El promedio del alquiler por metro cuadrado en pesos (AMBA) es de $603 (pesos argentinos). 
+
+
+Ahora vamos a visualizar los datos.
+
+
+
+```{r}
+ggplot(properati_2020)+
+  geom_histogram(aes(x=rooms), bins = 75) +
+  labs(title="Ciudad grande y espacios chicos: el caso del AMBA",
+        subtitle="¿Cuán pequeños son los espacios que habitamos?",
+        x="Ambientes",
+        y="Publicaciones",
+        caption="Fuente:Properati octubre-diciembre 2020")
+```
+
+Podemos ver que hay muchas propiedades con 2 y 3 ambientes. A partir de 5 ambientes, la cantidad de ofertas de propiedades disminuye sensiblemente. Detectamos algunos outliers que tienen alrededor de 9 y 10 ambientes.
+
+
+Ahora, quiero visualizar por tipo de operación:
+
+
+```{r}
+ggplot(properati_2020)+
+  geom_histogram(aes(x=rooms, fill=operation_type), bins = 75)+
+  facet_grid(provincia~.) +
+  labs(title="Ciudad grande y espacios chicos: el caso del AMBA",
+        subtitle="¿Todos venden o nadie compra?",
+        x="Ambientes",
+        y="Publicaciones",
+        fill="Tipo de operación",
+        caption="Fuente:Properati octubre-diciembre 2020")
+```
+
+Predomina la venta sobre el alquiler (tanto en CABA como en GCBA).
+
+Finalmente, voy a realizar un gráfica de puntos que relaciona 2 variables numéricas, para analizar si existe relación entre superficie total y el precio total de las propiedades.
+
+
+```{r}
+ggplot(properati_2020)+
+  geom_point(aes(x=surface_total, y=price), alpha= 1.0) + 
+  labs(title="LO CARO ES PEQUEÑO.",
+        x="Superficie total",
+        y="Precio",
+        caption="Fuente:Properati octubre-diciembre 2020") +
+  theme_minimal()
+
+```
+
+
+Vemos que las propiedades más costosas tienen menos de 500 mts2. Incluso, varias propiedades entre 1500 y 5000 mts2 se encuentran en segmentos de bajo precio. Esto nos podría indicar que los determinantes del precio son otros factores: ubicación, calidad, ammenities, etc.
+
+
+Saludos!
