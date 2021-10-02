@@ -11,7 +11,7 @@ library("tidyverse")
 ```
 
 
-Para el ejercicio 1 voy a trabajar con el Dataset “Properati | Propiedades en Venta y Alquiler publicados” (AMBA/oct.-dic. 2020).
+Para realizar los ejercicios voy a trabajar con el Dataset “Properati | Propiedades en Venta y Alquiler publicados” (AMBA/oct.-dic. 2020).
 
 ```{r}
 properati_2020 <- read.csv ("data/amba_properati_oct_dic_2020.csv")
@@ -211,4 +211,4 @@ ggplot(properati_2020)+
 Vemos que las propiedades más costosas tienen menos de 500 mts2. Incluso, varias propiedades entre 1500 y 5000 mts2 se encuentran en segmentos de bajo precio. Esto nos podría indicar que los determinantes del precio son otros factores: ubicación, calidad, ammenities, etc.
 
 
-Saludos!
+¡Saludos!
