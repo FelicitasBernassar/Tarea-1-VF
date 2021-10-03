@@ -1,26 +1,67 @@
 ---
-title: "tp2"
+title: "tp2 y tp3"
 author: "Felicitas Bernassar"
 date: "3/10/2021"
 output: html_document
 ---
 
-Vamos a empezar cargando las librerías
+Vamos a empezar cargando las librerías, para hacer el tp2 y 3 de scrapping:
 
 ```{r}
-library(tidyverse)
-library(rvest)
+library(tidyverse) 
+library(rvest) 
+library(stringr) 
 ```
-Scrapeamos datos
 
+
+Ahora vamos a cargar la info de la web de El Cronista:
+
+
+```{r}
+Cronista <- "https://www.cronista.com/MercadosOnline/dolar.html"
+```
+
+
+Obtenemos datos para generar luego nuestra propia tabla:
+
+
+```{r}
+moneda <- read_html(Cronista) %>%
+  html_nodes(xpath = '//*[(@id = "market-scrll-1")]//*[contains(concat( " ", @class, " " ), concat( " ", "name", " " ))]') %>%
+  html_text2()
+```
+
+
+```{r}
+valor <- read_html(Cronista) %>% 
+  html_nodes(xpath = '//*[contains(concat( " ", @class, " " ), concat( " ", "value", " " ))]') %>%
+  html_text() %>%
+  str_replace_all ("[^[:alnum:]]", "") %>% 
+  as.numeric()
+```
+
+
+```{r}
+Tipo_dolar <- read_html(Cronista) %>%
+  html_nodes(xpath = '//*[(@id = "market-scrll-1")]//*[contains(concat( " ", @class, " " ), concat( " ", "name", " " ))]') %>%
+  html_text2()
+```
+
+
+```{r}
+tabla_cronista <- tibble(moneda = moneda, Tipo_dolar = Tipo_dolar, valor = valor)
+```
 
 
 
 ```{r}
-casos_covid_caba <- read.csv("https://cdn.buenosaires.gob.ar/datosabiertos/datasets/salud/casos-covid-19/casos_covid19.csv")
-
-``
-
+head(tabla_cronista)
+```
 
 
-casos_covid_caba <- read.csv("https://cdn.buenosaires.gob.ar/datosabiertos/datasets/salud/casos-covid-19/casos_covid19.csv", header= TRUE, sep=',', dec='.', encoding = 'UTF-8')
+
+
+Generé de esta manera una tabla con 3 columnas: moneda, tipo de dolar y valor. 
+
+
+¡saludos!
